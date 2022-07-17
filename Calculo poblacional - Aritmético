@@ -1,0 +1,107 @@
+datos <- read.table("datos_poblacion.txt", header=T) #Se puede crear un archivo de texto que contenga los datos históricos
+datos
+
+#Cálculo de tasa para 2 años 
+#Este código encuentra el valor de la tasa para parejas de datos
+rapar <- matrix(nrow=6,ncol=5)
+aux1 <- 1
+for (i in 1:(nrow(datos)-1)){
+  for (j in (i+1):nrow(datos)){
+    a_a <- (datos[j,2]/datos[i,2]-1)/(datos[j,1]-datos[i,1]) #cálculo de r
+    rapar[aux1,1] <- datos[i,1]
+    rapar[aux1,2] <- datos[j,1]
+    rapar[aux1,3] <- datos[j,1]-datos[i,1]
+    rapar[aux1,4] <- a_a
+    rapar[aux1,5] <- a_a*rapar[aux1,3]
+    aux1 <- aux1+1
+  }
+}
+colnames(rapar) <- c("Año1","Año2","t","r","r*t")
+rapar
+
+# Cálculo de tasa para 3 años
+#El siguiente cálculo utiliza los datos de r en parejas para encontrar r en conjuntos de 3
+ratri <- matrix(nrow=4,ncol=5)
+colnames(ratri) <- c("Año1","Año2","Año3","t","r")
+#Para Año1, Año2, Año3
+ratri[1,1] <- datos[1,1]
+ratri[1,2] <- datos[2,1]
+ratri[1,3] <- datos[3,1]
+ratri[1,4] <- ratri[1,3]-ratri[1,1]
+ratri[1,5] <- (rapar[4,5]+rapar[1,5])/(ratri[1,4])
+
+#Para Año1, Año2, Año4
+ratri[2,1] <- datos[1,1]
+ratri[2,2] <- datos[2,1]
+ratri[2,3] <- datos[4,1]
+ratri[2,4] <- ratri[2,3]-ratri[2,1]
+ratri[2,5] <- (rapar[5,5]+rapar[1,5])/(ratri[2,4])
+
+#Para Año1, Año3, Año4
+ratri[3,1] <- datos[1,1]
+ratri[3,2] <- datos[3,1]
+ratri[3,3] <- datos[4,1]
+ratri[3,4] <- ratri[3,3]-ratri[3,1]
+ratri[3,5] <- (rapar[6,5]+rapar[2,5])/(ratri[3,4])
+
+#Para Año2, Año3, Año4
+ratri[4,1] <- datos[2,1]
+ratri[4,2] <- datos[3,1]
+ratri[4,3] <- datos[4,1]
+ratri[4,4] <- ratri[4,3]-ratri[4,1]
+ratri[4,5] <- (rapar[6,5]+rapar[4,5])/(ratri[4,4])
+
+ratri
+
+# Cálculo para tasa con 4 años
+
+racua <- matrix(nrow=1,ncol=6)
+colnames(racua) <- c("Año1","Año2","Año3","Año4","t","r")
+
+#Para Año1, Año2, Año3, Año4
+racua[1,1] <- datos[1,1]
+racua[1,2] <- datos[2,1]
+racua[1,3] <- datos[3,1]
+racua[1,4] <- datos[4,1]
+racua[1,5] <- racua[1,4]-racua[1,1]
+racua[1,6] <- (rapar[1,5]+rapar[4,5]+rapar[6,5])/racua[1,5]
+
+racua
+
+# Gráficas
+datos_arit <- datos
+datos_arit[5,1] <- 2020 # Aquí va el año al que queremos calcular la población futura
+for (i in 2:5){
+  datos_arit$r1[1] <- datos_arit[1,2]
+  datos_arit$r1[i] <- round(datos_arit[i-1,3]*(1+ratri[1,5]*(datos_arit[i,1]-datos_arit[i-1,1])))
+
+  datos_arit$r2[1] <- datos_arit[1,2]
+  datos_arit$r2[i] <- round(datos_arit[i-1,4]*(1+ratri[2,5]*(datos_arit[i,1]-datos_arit[i-1,1])))
+
+  datos_arit$r3[1] <- datos_arit[1,2]
+  datos_arit$r3[i] <- round(datos_arit[i-1,5]*(1+ratri[3,5]*(datos_arit[i,1]-datos_arit[i-1,1])))
+
+  datos_arit$r4[1] <- datos_arit[1,2]
+  datos_arit$r4[i] <- round(datos_arit[i-1,6]*(1+ratri[4,5]*(datos_arit[i,1]-datos_arit[i-1,1])))
+
+  datos_arit$r5[1] <- datos_arit[1,2]
+  datos_arit$r5[i] <- round(datos_arit[i-1,7]*(1+racua[1,6]*(datos_arit[i,1]-datos_arit[i-1,1])))
+}
+datos_arit
+
+library(tidyverse)
+
+plot(datos_arit$YEAR,datos_arit$HAB,type="l",ylim=c(0,max(datos_arit[5,3:6])+100),xlab="Años",ylab="Habitantes",main="Cálculo poblacional por método aritmético")
+lines(datos_arit$YEAR,datos_arit$r1,type="l",col="red")
+lines(datos_arit$YEAR,datos_arit$r2,type="l",col="blue")
+lines(datos_arit$YEAR,datos_arit$r3,type="l",col="darkgreen")
+lines(datos_arit$YEAR,datos_arit$r4,type="l",col="cyan")
+lines(datos_arit$YEAR,datos_arit$r5,type="l",col="magenta")
+grid()
+legend(x="topleft",
+       legend=c("Censo", str_c("r1 = ", round(ratri[1,5],3)), str_c("r2 = ", round(ratri[2,5],3)),str_c("r3 = ",round(ratri[3,5],3)),str_c("r4 = ",round(ratri[4,5],3)),str_c("r5 = ",round(racua[1,6],3))),
+       col=c("black","red","blue","darkgreen","cyan","magenta"),
+       lwd=1,
+       bg="gray",
+       cex=0.8)
+ 
