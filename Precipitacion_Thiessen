@@ -1,0 +1,33 @@
+#Librerías 
+library(foreign)
+library(rgdal)
+
+datos <- read.dbf("thiessen.dbf") 
+datos$Prec_Pon <- datos$Area*datos$Prec
+datos
+p_thiessen <- sum(datos$Prec_Pon)/sum(datos$Area)
+
+thiessen <-  readOGR(dsn="Thiessen", 
+                     layer="thiessen") #asignando la capa
+thiessen.wgs <- spTransform(thiessen, 
+                            CRS("+proj=longlat +ellps=WGS84")) #asigando coordanadas
+
+plot(thiessen.wgs, 
+     axes=F, 
+     col=c("red","green","blue","cyan","magenta"), 
+     main="Cuenca Sullana",
+     sub="Figura 1. Polígonos de Thiessen",
+     xlab="Longitud",
+     ylab="Latitud") 
+
+#Grillas
+grid(col="black")
+
+#Ejes
+axis(side=1,lwd=0.3)
+axis(side=2,lwd=0.3)
+
+#Leyenda
+legend(x="bottomright",
+       legend=c("A","B","C","D","E"),
+       col=c("magenta","blue","green","cyan","red"),pch=15)
