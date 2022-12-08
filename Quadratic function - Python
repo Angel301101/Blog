@@ -47,6 +47,7 @@ def graph(a,b,c):
     plt.plot(x,a/3*x**3+b/2*x**2+c*x,color = "green",label="Integral (K=0)")
     plt.xlabel("x")
     plt.ylabel("f(x)")
+    plt.grid()
     plt.legend()
     plt.show()
 
