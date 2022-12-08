@@ -40,8 +40,19 @@ def calc(a,b,c):
     print("Integral = (", a/3,") x^3 + (",b/2,") x^2 + (",c, ") x + ", "K")
     return
 
+def graph(a,b,c):
+    x = np.arange(-10., 10., 0.2)
+    plt.plot(x, a*x**2+b*x+c, color="red",label="Función")
+    plt.plot(x,2*a*x+b,color="blue",label="Derivada")
+    plt.plot(x,a/3*x**3+b/2*x**2+c*x,color = "green",label="Integral (K=0)")
+    plt.xlabel("x")
+    plt.ylabel("f(x)")
+    plt.legend()
+    plt.show()
+
 print("-------Información ----------")
 roots(a,b,c)
 disc(a,b,c,)
 info(a,b,c)
 calc(a,b,c)
+graph(a,b,c)
