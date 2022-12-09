@@ -1,0 +1,24 @@
+from os import system
+import numpy as np 
+from matplotlib import pyplot as plt
+
+system("cls")
+
+T = float(input("Temperatura [°C]: "))
+
+def sat_vap(T):
+    es = 611*np.exp(17.27*T/(237.3+T))
+    return es
+
+def graph(T):
+    x = np.arange(0, T*2, 0.2)
+    plt.plot(x,sat_vap(x), color="red")
+    plt.xlabel("Temperature [°C]")
+    plt.ylabel(r'$e_s$  [Pa]')
+    plt.title("Saturation vapor pressure")
+    text = str(r'$e_s$ a ' + str(T) + " °C = " + str(round(sat_vap(T),3)) + " Pa")
+    plt.text(0, sat_vap(1.8*T), text, bbox=dict(boxstyle="round", color = "red", alpha = 0.3))
+    plt.grid()
+    plt.show()
+
+graph(T)
