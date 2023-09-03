@@ -1,0 +1,13 @@
+#Seleccióna tu archivo 
+archivo <- file.choose()
+data_file <- read.csv(archivo)   
+data_file
+
+#Función
+curva_hipso <- function (data_file){
+        data_file$Altitud_per <- (data_file$Altitud - min(data_file$Altitud))/ (max(data_file$Altitud) - min(data_file$Altitud))
+        data_file$Área <- 1 - data_file$Área / 100 
+        plot(data_file$Área, data_file$Altitud_per, xlab = "Area Acumulada Relativa", ylab = "Elevación Relativa", type = "l", col = "blue", main = "Curva Hipsométrica")
+}
+
+curva_hipso(data_file)
